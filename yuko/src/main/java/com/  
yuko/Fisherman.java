@@ -1,3 +1,7 @@
+package com.yuko;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 /**
  * Клас, що представляє рибалку
  */
@@ -5,13 +9,16 @@ public class Fisherman {
     private String name;
     private String location;
     private CatchLog catchLog;
+    private final CatchLogService catchLogService;
 
     /**
      * Конструктор для створення нового рибалки
      */
-    public Fisherman(String name) {
+    @Inject
+    public Fisherman(@Named("fisherman.name") String name, CatchLogService catchLogService) {
         this.name = name;
-        this.catchLog = new CatchLog();
+        this.catchLog = new CatchLog(); // композиція
+        this.catchLogService = catchLogService;
         System.out.println("Створено нового рибалку: " + name);
     }
 
@@ -34,6 +41,7 @@ public class Fisherman {
      */
     public void logCatch(String fish, double weight) {
         catchLog.addEntry(fish, weight);
+        catchLogService.saveCatch(this.name, fish, weight);
         System.out.println("Рибалка " + name + " зареєстрував вилов: " + fish + ", вага: " + weight + " кг");
     }
 
