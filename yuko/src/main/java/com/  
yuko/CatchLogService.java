@@ -23,6 +23,9 @@ public class CatchLogService {
         this.connection = connection;
     }
 
+
+
+
     /**
      * Зберегти запис про вилов у таблицю catches
      */

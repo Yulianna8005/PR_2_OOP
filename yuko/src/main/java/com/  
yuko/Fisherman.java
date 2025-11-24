@@ -9,7 +9,13 @@ public class Fisherman {
     private String name;
     private String location;
     private CatchLog catchLog;
-    private final CatchLogService catchLogService;
+    private CatchLogService catchLogService;
+
+
+    @Inject
+    public void setCatchLogService(CatchLogService catchLogService) {
+        this.catchLogService = catchLogService;
+    }
 
     /**
      * Конструктор для створення нового рибалки
