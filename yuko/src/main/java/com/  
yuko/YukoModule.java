@@ -20,7 +20,7 @@ public class YukoModule extends AbstractModule {
 
         // Ім'я рибалки для інжекції (можеш змінити або додати інші binding-и)
         bind(String.class).annotatedWith(Names.named("fisherman.name"))
-                .toInstance("Петро");
+                .toInstance("Діма");
     }
 
     @Provides

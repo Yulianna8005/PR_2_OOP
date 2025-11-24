@@ -1,223 +1,105 @@
-@startuml Fishing System Class Diagram
-title Діаграма класів системи "Рибальство"
+@startuml Fishing System with Setter DI
+title Діаграма класів системи "Рибальство" (DI через setter-метод)
 
-' Абстрактний клас
-abstract class УчасникРибалки {
-  # {abstract} ім'я: String
-  # {abstract} ідентифікатор: int
-  # датаРеєстрації: Date
-  + {abstract} УчасникРибалки(ім'я: String, id: int)
-  + {abstract} отриматиІнформацію(): String
-  + {abstract} виконатиДію(): void
+' Головні класи
+class Application {
+  + {static} main(args: String[]): void
 }
 
-' Інтерфейс
-interface IПланВиходу {
-  + {abstract} плануватиВихід(дата: Date): boolean
-  + {abstract} перевіритиУмови(): String
-  + {abstract} отриматиРекомендації(): String
+class Fisherman {
+  - name: String
+  - location: String
+  - catchLog: CatchLog
+  - catchLogService: CatchLogService
+  + Fisherman(name: String, catchLogService: CatchLogService)
+  + setCatchLogService(service: CatchLogService): void
+  + checkDepthMap(): void
+  + checkFishingSpots(): void
+  + logCatch(fish: String, weight: double): void
+  + startFishing(location: String): void
 }
 
-' Основні класи
-class Рибалка {
-  - досвід: int
-  - ліцензія: String
-  - рівень: String
-  - контактнийТелефон: String
-  + Рибалка(ім'я: String, id: int, ліцензія: String)
-  + перевіритиКартуГлибин(водойма: Водойма)
-  + перевіритиТочкиКльову(водойма: Водойма)
-  + зареєструватиВилов(риба: Риба, журнал: ЖурналВилову)
-  + плануватиВихід(водойма: Водойма, дата: Date)
-  + {final} отриматиСтатистику(): String
-  + setCatchLogService(service: CatchLogService): void   
+class Sensor {
+  - id: String
+  - location: String
+  + Sensor(id: String, location: String)
+  + measureTemperature(): double
+  + measureWaterQuality(): String
+  + getSensorData(): String
 }
 
-Рибалка --> ЖурналВилову
-Рибалка --> CatchLogService : setter DI   
+class Ecologist {
+  - name: String
+  + Ecologist(name: String)
+  + getWaterConditionReport(sensor: Sensor): void
+  + analyzeEnvironment(location: String): void
+}
 
+class CatchLog {
+  - entries: List<String>
+  + CatchLog()
+  + addEntry(fish: String, weight: double): void
+  + getEntries(): List<String>
+}
 
+class CatchLogService {
+  - connection: Connection
+  + CatchLogService(connection: Connection)
+  + saveCatch(fisherman: String, fish: String, weight: double): void
+}
 
-note right of Рибалка
-  ЖурналВилову передається через конструктор
-  (реалізація Dependency Injection)
+class YukoModule {
+  + configure(): void
+  + provideConnection(url: String): Connection
+  - createTableIfNotExists(connection: Connection): void
+}
+
+interface Connection <<interface>> {
+}
+
+' Зв'язки DI
+Fisherman --> CatchLogService : <<setter DI>>
+CatchLogService --> Connection : <<constructor DI>>
+
+' Композиція
+Fisherman *-- "1" CatchLog : створює
+
+' Залежності
+Application ..> YukoModule : використовує
+Application ..> Fisherman : створює через Guice
+YukoModule ..> Connection : надає
+YukoModule ..> CatchLogService : конфігурує
+
+' Звичайні залежності
+Ecologist --> Sensor : використовує
+
+note right of Fisherman
+  <b>Setter Dependency Injection</b>
+  CatchLogService впроваджується
+  через setter-метод
+  setCatchLogService()
+  позначений @Inject
 end note
 
-
-class Сенсор {
-  - типСенсора: String
-  - точність: double
-  - стан: boolean
-  - останняКалібровка: Date
-  + Сенсор(ім'я: String, id: int, тип: String)
-  + фіксуватиТемпературу(водойма: Водойма): double
-  + фіксуватиЯкістьВоди(водойма: Водойма): ЯкістьВоди
-  + калібрувати(): boolean
-  + отриматиДані(): Map<String, Object>
-}
-
-class Еколог {
-  - спеціалізація: String
-  - організація: String
-  - рівеньДоступу: int
-  - контактнийEmail: String
-  + Еколог(ім'я: String, id: int, спеціалізація: String)
-  + отриматиЗвіт(водойма: Водойма): Звіт
-  + аналізуватиДані(сенсори: List<Сенсор>): String
-  + перевіритиЯкістьВоди(водойма: Водойма): boolean
-  + надатиРекомендації(): List<String>
-}
-
-' Додаткові класи
-class Водойма {
-  - назва: String
-  - площа: double
-  - максимальнаГлибина: double
-  - типВодойми: String
-  - координати: String
-  + Водойма(назва: String, площа: double)
-  + отриматиКартуГлибин(): Map<Point, Double>
-  + отриматиТочкиКльову(): List<Point>
-  + оновитиДаніСенсорів(сенсор: Сенсор): void
-  + отриматиІнформацію(): String
-}
-
-class ВихідНаВоду {
-  - id: int
-  - дата: Date
-  - тривалість: int
-  - метеоумови: String
-  - статус: String
-  - локація: String
-  + ВихідНаВоду(дата: Date, тривалість: int)
-  + планувати(рибалка: Рибалка, водойма: Водойма): boolean
-  + записатиРезультат(журнал: ЖурналВилову): void
-  + отриматиПрогнозПогоди(служба: СлужбаПогоди): String
-  + завершитиВихід(): void
-}
-
-class ЖурналВилову {
-  - id: int
-  - датаСтворення: Date
-  - версія: String
-  - записи: List<ЗаписВилову>
-  + ЖурналВилову()
-  + додатиЗапис(запис: ЗаписВилову): void
-  + отриматиСтатистику(рибалка: Рибалка): String
-  + {final} експортуватиЗвіт(формат: String): String
-  + знайтиЗаписиЗаПеріод(з: Date, по: Date): List<ЗаписВилову>
-}
-
-class СлужбаПогоди {
-  - APIключ: String
-  - джерело: String
-  - оновлення: Date
-  - регіон: String
-  + СлужбаПогоди(APIключ: String)
-  + отриматиПрогноз(місце: String, дата: Date): String
-  + перевіритиУмови(локація: String): boolean
-  + отриматиПопередження(): List<String>
-  + оновитиДані(): void
-}
-
-class Риба {
-  - вид: String
-  - вага: double
-  - розмір: double
-  - сезон: String
-  - мінімальнийРозмір: double
-  + Риба(вид: String, вага: double, розмір: double)
-  + отриматиІнформацію(): String
-  + перевіритиДопустимість(): boolean
-  + отриматиСезон(): String
-}
-
-class ЗаписВилову {
-  - id: int
-  - дата: Date
-  - кількість: int
-  - примітки: String
-  + ЗаписВилову(дата: Date, риба: Риба)
-  + додатиПримітку(примітка: String): void
-  + отриматиІнформацію(): String
-}
-
-class ЯкістьВоди {
-  - pH: double
-  - кисень: double
-  - прозорість: double
-  - температура: double
-  + ЯкістьВоди(pH: double, кисень: double)
-  + перевіритиНорму(): boolean
-  + отриматиПоказники(): Map<String, Double>
-}
-
-class Звіт {
-  - id: int
-  - датаГенерації: Date
-  - тип: String
-  - дані: Map<String, Object>
-  + Звіт(тип: String)
-  + додатиДані(ключ: String, значення: Object): void
-  + згенеруватиЗвіт(): String
-  + експортувати(формат: String): boolean
-}
-
-' Зв'язки наслідування
-УчасникРибалки <|-- Рибалка
-УчасникРибалки <|-- Сенсор
-УчасникРибалки <|-- Еколог
-
-' Зв'язки реалізації інтерфейсу
-IПланВиходу <|.. ВихідНаВоду
-IПланВиходу <|.. СлужбаПогоди
-
-' Зв'язки агрегації
-Водойма o-- "1..*" ВихідНаВоду
-Рибалка o-- "0..*" ВихідНаВоду
-
-' Зв'язки композиції
-ЖурналВилову *-- "0..*" ЗаписВилову
-ЗаписВилову *-- "1..*" Риба
-ВихідНаВоду *-- "1" ЖурналВилову
-
-' Зв'язки залежності
-Рибалка --> Водойма
-Рибалка --> ЖурналВилову
-ВихідНаВоду --> СлужбаПогоди
-Еколог --> Сенсор
-Еколог --> Водойма
-Еколог --> Звіт
-Сенсор --> Водойма
-Сенсор --> ЯкістьВоди
-Водойма --> ЯкістьВоди
-
-note top of УчасникРибалки
-  <b>Абстрактний клас</b>
-  Інкапсулює спільну поведінку
-  всіх учасників системи
+note right of CatchLogService
+  <b>Constructor Dependency Injection</b>
+  Connection впроваджується
+  через конструктор за допомогою @Inject
+  (залишається без змін)
 end note
 
-note right of IПланВиходу
-  <b>Інтерфейс</b>
-  Визначає контракт для
-  планування виходів на воду
-end note
-
-note left of Рибалка
-  <b>Фінальний метод:</b>
-  отриматиСтатистику()
-end note
-
-note right of ЖурналВилову
-  <b>Фінальний метод:</b>
-  експортуватиЗвіт()
+note bottom of YukoModule
+  <b>Google Guice Module</b>
+  Конфігурує залежності:
+  - Connection (Singleton)
+  - JDBC URL
+  - fisherman.name
 end note
 
 legend bottom
   <b>Типи зв'язків:</b>
-  | Наслідування | Реалізація | Агрегація | Композиція | Залежність |
-  | <:-- | <.. | o-- | *-- | --> |
+  | Setter DI | Constructor DI | Композиція | Залежність |
+  | <<setter DI>> | <<constructor DI>> | *-- | ..> |
 end legend
 
 @enduml
