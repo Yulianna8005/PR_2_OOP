@@ -1,10 +1,19 @@
+package com.yuko;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 /**
  * Головний клас програми
  */
 public class Application {
     public static void main(String[] args) {
-        // Створення об'єктів
-        Fisherman fisherman = new Fisherman("Петро");
+        // Створюємо Guice інжектор з нашим модулем
+        Injector injector = Guice.createInjector(new YukoModule());
+
+        // Отримуємо рибалку через Guice (імена/залежності будуть впроваджені)
+        Fisherman fisherman = injector.getInstance(Fisherman.class);
+
+        // Сенсор і еколог поки створюємо "вручну" — вони не залежні від БД/Guice у цьому прикладі
         Sensor sensor = new Sensor("S001", "Озеро");
         Ecologist ecologist = new Ecologist("Марія");
 
@@ -12,6 +21,7 @@ public class Application {
         System.out.println("\n=== Початок риболовлі ===");
         
         // Рибалка перевіряє умови
+        fisherman.setCatchLog(new CatchLog());
         fisherman.checkDepthMap();
         fisherman.checkFishingSpots();
         
