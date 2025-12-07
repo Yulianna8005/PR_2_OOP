@@ -21,12 +21,28 @@ public class Fisherman {
      * Конструктор для створення нового рибалки
      */
     @Inject
-    public Fisherman(@Named("fisherman.name") String name, CatchLogService catchLogService) {
+    public void setName(@Named("fisherman.name") String name) {
         this.name = name;
-        this.catchLog = new CatchLog(); // композиція
-        this.catchLogService = catchLogService;
-        System.out.println("Створено нового рибалку: " + name);
+        // this.catchLog = new CatchLog(); // композиція
+        // this.catchLogService = catchLogService;
+        // System.out.println("Створено нового рибалку: " + name);
     }
+
+    public void setCatchLog(CatchLog catchLog) {
+        this.catchLog = catchLog;
+
+    }
+
+    // /**
+    //  * Конструктор для створення нового рибалки
+    //  */
+    // @Inject
+    // public Fisherman(@Named("fisherman.name") String name, CatchLogService catchLogService) {
+    //     this.name = name;
+    //     this.catchLog = new CatchLog(); // композиція
+    //     this.catchLogService = catchLogService;
+    //     System.out.println("Створено нового рибалку: " + name);
+    // }
 
     /**
      * Перевірка карти глибин

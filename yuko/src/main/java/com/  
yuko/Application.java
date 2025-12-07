@@ -21,6 +21,7 @@ public class Application {
         System.out.println("\n=== Початок риболовлі ===");
         
         // Рибалка перевіряє умови
+        fisherman.setCatchLog(new CatchLog());
         fisherman.checkDepthMap();
         fisherman.checkFishingSpots();
         
