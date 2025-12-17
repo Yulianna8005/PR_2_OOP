@@ -2,7 +2,10 @@ package com.yuko;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList; 
+import java.util.List; 
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,6 +42,30 @@ public class CatchLogService {
             System.out.println("Збережено запис у БД: " + fisherman + " - " + fish + " (" + weight + " кг)");
         } catch (SQLException e) {
             throw new RuntimeException("Не вдалося зберегти запис у базу", e);
+        }
+    }
+
+    public List<CatchEntry> getAllCatches() {
+        List<CatchEntry> catches = new ArrayList<>();
+        // SQL-запит для читання всіх даних
+        String sql = "SELECT id, fisherman, fish, weight, caught_at FROM catches ORDER BY caught_at DESC";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                catches.add(new CatchEntry(
+                    rs.getInt("id"),
+                    rs.getString("fisherman"),
+                    rs.getString("fish"),
+                    rs.getDouble("weight"),
+                    rs.getString("caught_at")
+                ));
+            }
+            System.out.println("Прочитано " + catches.size() + " записів вилову з бази даних.");
+            return catches;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Не вдалося прочитати записи вилову з бази", e);
         }
     }
 }

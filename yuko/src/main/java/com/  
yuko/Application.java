@@ -2,6 +2,9 @@ package com.yuko;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+// import com.yuko.view.CatchWebView; // Якщо ви створили пакет view
+// Або просто:
+// import com.yuko.CatchWebView; // <--- ДОДАТИ
 /**
  * Головний клас програми
  */
@@ -41,5 +44,13 @@ public class Application {
         fisherman.logCatch("Щука", 3.0);
         
         System.out.println("\n=== Завершення риболовлі ===");
+
+        runWebMode(injector);
+    }
+
+    private static void runWebMode(Injector injector) {
+        // Використовуємо наш CatchWebView
+        CatchWebView webView = injector.getInstance(CatchWebView.class);
+        webView.start(8080); // Порт 8080
     }
 }
